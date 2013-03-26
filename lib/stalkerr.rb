@@ -1,0 +1,7 @@
+require 'stalkerr/version'
+require 'stalkerr/optparse'
+require 'stalkerr/const'
+require 'stalkerr/server'
+require 'stalkerr/session'
+require 'stalkerr/target'
+require 'stalkerr/extensions/string'

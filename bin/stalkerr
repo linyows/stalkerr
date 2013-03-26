@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'stalkerr'
+
+::Stalkerr::Server.run
