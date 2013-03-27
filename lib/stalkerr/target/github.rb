@@ -19,12 +19,15 @@ module Stalkerr::Target
     end
 
     def client
-      @client ||= Octokit::Client.new(login: @username, password: @password)
+      if !@client || @client && !@client.authenticated?
+        @client = Octokit.new(login: @username, password: @password)
+      end
+      @client
     end
 
     def stalking(&post)
       @post = post
-      client.received_events(@username).reverse_each { |event|
+      client.received_events(@username).sort_by(&:id).reverse_each { |event|
         if @last_event_id.nil?
           next if Time.now.utc - Stalkerr::Const::ROLLBACK_SEC >= Time.parse(event.created_at).utc
         else
@@ -97,10 +100,11 @@ module Stalkerr::Target
           none_repository = true
           status = "created repository"
           title = event.repo.name
+          title = "#{title}: #{obj.description}" if obj.description
         else
           status = "created #{obj.ref_type}:#{obj.ref}"
+          title = obj.description
         end
-        title = obj.description
         link = "#{HOST}/#{event.repo.name}"
       when 'DeleteEvent'
         status = "deleted #{obj.ref_type}:#{obj.ref}"
@@ -180,6 +184,7 @@ module Stalkerr::Target
     end
 
     def split_for_comment(string)
+      return [] unless string.is_a? String
       string.split(/\r\n|\n/).map { |v| v unless v.eql? '' }.compact
     end
 
