@@ -184,6 +184,7 @@ module Stalkerr::Target
     end
 
     def split_for_comment(string)
+      return [] unless string.is_a? String
       string.split(/\r\n|\n/).map { |v| v unless v.eql? '' }.compact
     end
 
