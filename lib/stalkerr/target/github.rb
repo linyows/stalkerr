@@ -27,7 +27,7 @@ module Stalkerr::Target
 
     def stalking(&post)
       @post = post
-      client.received_events(@username).reverse_each { |event|
+      client.received_events(@username).sort_by(&:id).reverse_each { |event|
         if @last_event_id.nil?
           next if Time.now.utc - Stalkerr::Const::ROLLBACK_SEC >= Time.parse(event.created_at).utc
         else
