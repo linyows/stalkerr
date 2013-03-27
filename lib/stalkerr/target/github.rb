@@ -100,10 +100,11 @@ module Stalkerr::Target
           none_repository = true
           status = "created repository"
           title = event.repo.name
+          title = "#{title}: #{obj.description}" if obj.description
         else
           status = "created #{obj.ref_type}:#{obj.ref}"
+          title = obj.description
         end
-        title = obj.description
         link = "#{HOST}/#{event.repo.name}"
       when 'DeleteEvent'
         status = "deleted #{obj.ref_type}:#{obj.ref}"
