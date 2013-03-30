@@ -6,18 +6,22 @@ Dir["#{File.dirname(__FILE__)}/target/*.rb"].each { |p| require p }
 
 class Stalkerr::Session < Net::IRC::Server::Session
 
+  def server_name
+    'Stalkerr'
+  end
+
+  def server_version
+    Stalkerr::VERSION
+  end
+
   def initialize(*args)
     super
     @debug = args.last.debug
-    @channels = {}
+    @channels = @threads = @targets = {}
     Dir["#{File.dirname(__FILE__)}/target/*.rb"].each do |path|
       name = File.basename(path, '.rb')
       @channels.merge!(name.to_sym => "##{name}")
     end
-  end
-
-  def on_disconnected
-    @retrieve_thread.kill rescue nil
   end
 
   def on_user(m)
@@ -36,23 +40,40 @@ class Stalkerr::Session < Net::IRC::Server::Session
 
   def on_join(m)
     super
+    create_worker(m.params)
+  end
 
-    matched = m.params[1].match(/(.*?):(.*)/)
-    channel = m.params[0]
+  def on_part(m)
+    super
+    kill @threads[m.params.first]
+  end
 
-    if !@channels.value?(channel) || !matched
-      @log.error "#{channel} not found."
+  def on_disconnected
+    super
+    kill_all
+  end
+
+  private
+
+  def create_worker(params)
+    channels = params[0].split(',')
+    keys = params[1].split(',')
+    channels.each_with_index.map { |v, i| [v, keys[i]] }.each do |channel, key|
+      guard auth_data(key).merge(channel: channel)
     end
+  end
 
-    @class_name = "Stalkerr::Target::#{@channels.invert[channel].capitalize}"
-    @username = matched[1]
-    @password = matched[2]
-    post @username, JOIN, channel
+  def auth_data(key)
+    id, pw = key.match(/(.*?):(.*)/).to_a.pop(2)
+    { username: id, password: pw }
+  end
 
-    @retrieve_thread = Thread.start do
+  def guard(params)
+    post params[:username], JOIN, params[:channel]
+    @threads[params[:channel]] = Thread.start(target params) do |service|
       loop do
         begin
-          target.stalking do |prefix, command, *params|
+          service.stalking do |prefix, command, *params|
             post(prefix, command, *params)
           end
           sleep Stalkerr::Const::FETCH_INTERVAL
@@ -65,9 +86,20 @@ class Stalkerr::Session < Net::IRC::Server::Session
     end
   end
 
-  private
+  def target(params)
+    ch = params[:channel]
+    class_name = "Stalkerr::Target::#{@channels.invert[ch].capitalize}"
+    unless @targets[ch].is_a?(class_name.constantize)
+      @targets[ch] = class_name.constantize.new(params[:username], params[:password])
+    end
+    @targets[ch]
+  end
 
-  def target
-    @target ||= @class_name.constantize.new(@username, @password)
+  def kill(thread)
+    thread.kill if thread && thread.alive?
+  end
+
+  def kill_all
+    @threads.each { |channel, thread| thread.kill if thread.alive? } rescue nil
   end
 end

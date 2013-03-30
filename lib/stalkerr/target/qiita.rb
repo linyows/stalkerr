@@ -17,14 +17,7 @@ module Stalkerr::Target
       @username = username
       @password = password
       @last_fetched_at = nil
-      @last_markers = {
-        followings: {
-          stock: nil,
-          item: nil,
-          user: nil
-        },
-        tag_items: nil
-      }
+      @marker = nil
     end
 
     def client
@@ -32,47 +25,45 @@ module Stalkerr::Target
     end
 
     def stalking(&post)
-      return if !@last_fetched_at.nil? && Time.now.utc < @last_fetched_at + INTERVAL
+      return if @last_fetched_at && Time.now.utc < @last_fetched_at + INTERVAL
+      @last_fetched_at = Time.now.utc
 
       @post = post
+      stocked_items = posted_items = []
+      stocks = {}
 
       followings = client.user_following_users(@username).map { |u| u.url_name }.compact
       followings.each do |user|
-        client.user_stocks(user).reverse_each { |obj|
-          m = @last_markers[:followings][:stock]
-          if !m.nil? && m == obj.uuid
-            m = obj.uuid
-            break
-          end
-          parse 'stock', [user, obj]
-        }
-        client.user_items(user).reverse_each { |obj|
-          m = @last_markers[:followings][:stock]
-          if !m.nil? && m == obj.uuid
-            m = obj.uuid
-            break
-          end
-          parse 'item', [user, obj]
-        }
-        client.user_following_users(user).reverse_each { |obj|
-          m = @last_markers[:followings][:user]
-          if !m.nil? && m == obj.url_name
-            m = obj.url_name
-            break
-          end
-          parse 'user', [user, obj]
-        }
+        begin
+          stocks[user] = client.user_stocks(user)
+          stocked_items = stocked_items + stocks[user]
+        rescue => e
+          nil
+        end
+        begin
+          posted_items = posted_items + client.user_items(user)
+        rescue => e
+          nil
+        end
       end
 
       tags = client.user_following_tags(@username).map { |t| t.url_name }.compact
-      items = tags.inject([]) { |arr, tag| arr + client.tag_items(tag) }.uniq
-      items.each do |obj|
-        m = @last_markers[:tag_items]
-        if !m.nil? && m == obj.uuid
-          m = obj.uuid
-          break
+      new_items = tags.inject([]) { |arr, tag| arr + client.tag_items(encoder tag) }
+
+      items = (stocked_items + posted_items + new_items).uniq
+      items[0...30].sort_by(&:id).each do |obj|
+        next if @marker && @marker >= obj.id
+        type = 'new'
+        nick = obj.user.url_name
+        case
+        when stocked_items.include?(obj)
+          type = 'stock'
+          stocks.each { |user, items| nick = user and break if items.include?(obj) }
+        when posted_items.include?(obj)
+          type = 'post'
         end
-        parse 'item', [obj.user.url_name, obj]
+        parse type, [nick, obj]
+        @marker = obj.id
       end
     end
 
@@ -80,37 +71,44 @@ module Stalkerr::Target
       nick, obj = data
       header = status = title = link = ''
       body = []
+      notice_body = false
 
       case type
       when 'stock'
         status = "stocked entry"
         color = :pink
-        title = "#{obj.title}"
-        body = split_for_body obj.raw_body
-        link = obj.url
-      when 'item'
-        status = "new entry"
+      when 'post'
+        status = "posted entry"
         color = :yellow
-        title = "#{obj.title}"
-        body = split_for_body obj.raw_body
-        link = obj.url
-      when 'user'
-        status = "followed #{obj.url_name}"
-        color = :rainbow
-        link = "#{HOST}/users/#{obj.url_name}"
+      when 'new'
+        status = "new entry"
+        color = :aqua
+        notice_body = true
       end
+      title = "#{obj.title}"
+      body = split_for_body obj.raw_body
+      link = obj.url
 
       header = StringIrc.new(status).send(color)
       header = "#{header} #{title}" unless title.eql? ''
       header = "#{header} - #{StringIrc.new(link).blue}"
 
-      @post.call nick, NOTICE, CHANNEL, header
-      body.each { |b| @post.call nick, PRIVMSG, CHANNEL, b } unless body.eql? []
+      @post.call simple(nick), NOTICE, CHANNEL, header
+      mode = notice_body ? NOTICE : PRIVMSG
+      body.each { |b| @post.call simple(nick), mode, CHANNEL, b } unless body.eql? []
     end
 
     def split_for_body(string)
       return [] unless string.is_a?(String)
       string.split(/\r\n|\n/).map { |v| v unless v.eql? '' }.compact
+    end
+
+    def simple(string)
+      string.gsub('@github', '')
+    end
+
+    def encoder(string)
+      URI.encode(string).gsub('.', '%2e')
     end
   end
 end
