@@ -17,6 +17,7 @@ Usage
 ### Connecting to Stalkerr
 
     /join #github <username>:<password>
+    /join #qiita <username>:<password>
 
 Contributing
 ------------
@@ -30,7 +31,7 @@ Contributing
 Author
 ------
 
-- [@linyows](https://github.com/linyows)
+- [linyows](https://github.com/linyows)
 
 License
 -------
