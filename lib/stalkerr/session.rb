@@ -69,8 +69,11 @@ class Stalkerr::Session < Net::IRC::Server::Session
   end
 
   def guard(params)
-    post params[:username], JOIN, params[:channel]
-    @threads[params[:channel]] = Thread.start(target params) do |service|
+    ch = params[:channel]
+    return if @threads[ch].is_a?(Thread) && @threads[ch].alive?
+    post @nick, JOIN, ch
+
+    @threads[ch] = Thread.start(target params) do |service|
       loop do
         begin
           service.stalking do |prefix, command, *params|
@@ -80,7 +83,7 @@ class Stalkerr::Session < Net::IRC::Server::Session
         rescue Exception => e
           @log.error e.inspect
           e.backtrace.each { |l| @log.error "\t#{l}" }
-          sleep 10
+          sleep Stalkerr::Const::FETCH_INTERVAL
         end
       end
     end
