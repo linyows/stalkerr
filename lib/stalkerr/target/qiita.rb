@@ -58,7 +58,9 @@ module Stalkerr::Target
         case
         when stocked_items.include?(obj)
           type = 'stock'
-          stocks.each { |user, items| nick = user and break if items.include?(obj) }
+          stocks.each { |user, users_stocks|
+            nick = user and break if users_stocks.include?(obj)
+          }
         when posted_items.include?(obj)
           type = 'post'
         end
