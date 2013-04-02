@@ -16,8 +16,12 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.version       = Stalkerr::VERSION
 
-  gem.add_dependency 'net-irc'
-  gem.add_dependency 'json'
-  gem.add_dependency 'octokit'
-  gem.add_dependency 'string-irc'
+  gem.add_dependency 'net-irc', ['>= 0.0.9']
+  gem.add_dependency 'json', ['>= 1.7.7']
+  gem.add_dependency 'octokit', ['>= 0.0.9']
+  gem.add_dependency 'string-irc', ['>= 0.3.0']
+  gem.add_dependency 'qiita', ['>= 0.0.3']
+
+  gem.add_development_dependency 'bundler'
+  gem.add_development_dependency 'rspec'
 end
