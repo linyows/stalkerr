@@ -2,7 +2,6 @@ require 'time'
 require 'net/irc'
 require 'octokit'
 require 'net/http'
-require 'string-irc'
 require 'stalkerr'
 
 module Stalkerr::Target
@@ -29,27 +28,30 @@ module Stalkerr::Target
       @post = post
       client.received_events(@username).sort_by(&:id).reverse_each { |event|
         if @last_event_id.nil?
-          next if Time.now.utc - Stalkerr::Const::ROLLBACK_SEC >= Time.parse(event.created_at).utc
+          time = Time.now.utc - Stalkerr::Const::ROLLBACK_SEC
+          next if time >= Time.parse(event.created_at).utc
         else
           next if @last_event_id >= event.id
         end
-        result = parse(event)
-        @last_event_id = result if result != false
+        next unless result = parse(event)
+        posts(result)
+        @last_event_id = result.event_id
       }
     end
 
     def parse(event)
       obj = event.payload
-      header = status = title = link = ''
+      repository = event.repo.name
+
+      status = title = link = ''
       body = []
-      none_repository = false
-      notice_body = false
+      notice = false
 
       case event.type
       when 'CommitCommentEvent'
         status = "commented on commit"
         title = "#{obj.comment.path}"
-        body = body + split_for_comment(obj.comment.body)
+        body = obj.comment.body.split_by_crlf if obj.comment.body
         link = obj.comment.html_url
       when 'PullRequestReviewCommentEvent'
         status = "commented on pull request"
@@ -60,7 +62,7 @@ module Stalkerr::Target
         else
           title = obj.comment.path
         end
-        body = body + split_for_comment(obj.comment.body)
+        body = obj.comment.body.split_by_crlf if obj.comment.body
         link = obj.comment.html_url
       when 'IssueCommentEvent'
         if obj.action == 'created'
@@ -69,35 +71,35 @@ module Stalkerr::Target
         else
           status = "#{obj.action} issue comment"
         end
-        body = body + split_for_comment(obj.comment.body)
+        body = obj.comment.body.split_by_crlf if obj.comment.body
         link = obj.comment.html_url
       when 'IssuesEvent'
         status = "#{obj.action} issue ##{obj.issue.number}"
         title = obj.issue.title
-        body = body + split_for_comment(obj.issue.body)
+        body = obj.issue.body.split_by_crlf if obj.issue.body
         body << "assignee: #{obj.issue.assignee.login}" if obj.issue.assignee
         body << "milestone: #{obj.issue.milestone.title}[#{obj.issue.milestone.state}]" if obj.issue.milestone
         link = obj.issue.html_url
       when 'PullRequestEvent'
         status = "#{obj.action} pull request ##{obj.number}"
         title = obj.pull_request.title
-        body = body + split_for_comment(obj.pull_request.body)
+        body = obj.pull_request.body.split_by_crlf if obj.pull_request.body
         link = obj.pull_request.html_url
       when 'PushEvent'
-        notice_body = true
+        notice = true
         status = "pushed to #{obj.ref.gsub('refs/heads/', '')}"
         obj.commits.each do |commit|
           verbose_commit = client.commit(event.repo.name, commit.sha)
           name = verbose_commit.author ? verbose_commit.author.login : commit.author.name
           url = "#{HOST}/#{event.repo.name}/commit/#{commit.sha}"
-          line = "#{StringIrc.new(name).silver}: #{commit.message}"
-          line << " - #{StringIrc.new(shorten url).blue}"
-          body = body + split_for_comment(line)
+          line = "#{name.to_irc_color.silver}: #{commit.message}"
+          line << " - #{shorten(url).to_irc_color.blue}"
+          body = line.split_by_crlf
         end
         link = "#{HOST}/#{event.repo.name}"
       when 'CreateEvent'
         if obj.ref_type.eql? 'repository'
-          none_repository = true
+          repository = nil
           status = "created repository"
           title = event.repo.name
           title = "#{title}: #{obj.description}" if obj.description
@@ -121,24 +123,24 @@ module Stalkerr::Target
         status = "add team"
         title = obj.team.name
       when 'WatchEvent'
-        none_repository = true
+        repository = nil
         status = "#{obj.action} repository"
         title = event.repo.name
         link = "#{HOST}/#{event.repo.name}"
       when 'FollowEvent'
-        none_repository = true
-        notice_body = true
+        repository = nil
+        notice = true
         user = obj.target
         status = "followed"
         title = user.login
         title = "#{title} (#{user.name})" if user.name && user.name != ''
-        profile = ["#{StringIrc.new('repos').silver}: #{user.public_repos}"]
-        profile << "#{StringIrc.new('followers').silver}: #{user.followers}"
-        profile << "#{StringIrc.new('following').silver}: #{user.following}"
-        profile << "#{StringIrc.new('location').silver}: #{user.location && user.location != '' ? user.location : '-'}"
-        profile << "#{StringIrc.new('company').silver}: #{user.company && user.company != '' ? user.company : '-'}"
-        profile << "#{StringIrc.new('bio').silver}: #{user.bio && user.bio != '' ? user.bio : '-'}"
-        profile << "#{StringIrc.new('blog').silver}: #{user.blog && user.blog != '' ? user.blog : '-'}"
+        profile = ["#{'repos'.to_irc_color.silver}: #{user.public_repos}"]
+        profile << "#{'followers'.to_irc_color.silver}: #{user.followers}"
+        profile << "#{'following'.to_irc_color.silver}: #{user.following}"
+        profile << "#{'location'.to_irc_color.silver}: #{user.location && user.location != '' ? user.location : '-'}"
+        profile << "#{'company'.to_irc_color.silver}: #{user.company && user.company != '' ? user.company : '-'}"
+        profile << "#{'bio'.to_irc_color.silver}: #{user.bio && user.bio != '' ? user.bio : '-'}"
+        profile << "#{'blog'.to_irc_color.silver}: #{user.blog && user.blog != '' ? user.blog : '-'}"
         body << profile.join(', ')
         link = "#{HOST}/#{user.login}"
       when 'MemberEvent'
@@ -147,7 +149,7 @@ module Stalkerr::Target
         title = user.login
         link = "#{HOST}/#{user.login}"
       when 'GistEvent'
-        none_repository = true
+        repository = nil
         status = "#{obj.action}d gist"
         title = obj.gist.description unless obj.gist.description.eql? ''
         link = obj.gist.html_url
@@ -158,8 +160,7 @@ module Stalkerr::Target
         return false
       end
 
-      nick = event.actor.login
-      unless status.eql? ''
+      unless status.empty?
         color = case
                 when status.include?('created') then :pink
                 when status.include?('commented') then :yellow
@@ -171,21 +172,36 @@ module Stalkerr::Target
                 when status.include?('followed') then :seven_eleven
                 else :aqua
                 end
-        header = StringIrc.new(status).send(color)
-        header = "(#{event.repo.name}) #{header}" unless none_repository
+        status = status.to_irc_color.send(color)
       end
-      header = "#{header} #{title}" unless title.eql? ''
-      header = "#{header} - #{StringIrc.new(shorten link).blue}" unless link.eql? ''
 
-      @post.call nick, NOTICE, CHANNEL, header unless header.eql? ''
-      mode = notice_body ? NOTICE : PRIVMSG
-      body.each { |b| @post.call nick, mode, CHANNEL, b } unless body.eql? ''
-      event.id
+      {
+        event_id: event.id,
+        nick: event.actor.login,
+        status: status,
+        repository: repository,
+        link: link,
+        title: title,
+        body: body,
+        notice: notice
+      }
     end
 
-    def split_for_comment(string)
-      return [] unless string.is_a? String
-      string.split(/\r\n|\n/).map { |v| v unless v.eql? '' }.compact
+    def posts(params)
+      params.each { |k, v| eval "#{k} = v" }
+
+      header = ''
+      header = "(#{repository}) #{status}" unless repository.eql? ''
+      header = "#{header} #{title}" unless title.eql? ''
+      header = "#{header} - #{shorten(link).to_irc_color.blue}" unless link.eql? ''
+
+      unless header.empty?
+        @post.call nick, NOTICE, CHANNEL, header
+      end
+
+      if !body.nil? && !body.empty?
+        body.each { |b| @post.call nick, notice ? NOTICE : PRIVMSG, CHANNEL, b }
+      end
     end
 
     def shorten(url)
@@ -195,7 +211,7 @@ module Stalkerr::Target
         query = Hash.new.tap { |h| h[:url] = url }
         request.body = URI.encode_www_form(query)
         response = http.request(request)
-        response.key?('Location') ? response["Location"] : url
+        response.key?('Location') ? response['Location'] : url
       end
     end
   end

@@ -1,3 +1,5 @@
+require 'string-irc'
+
 module Stalkerr::Extensions
   module String
     def constantize
@@ -9,6 +11,14 @@ module Stalkerr::Extensions
           constant.const_get(name) : constant.const_missing(name)
       end
       constant
+    end
+
+    def split_by_crlf
+      self.split(/\r\n|\n/).map { |v| v unless v.eql? '' }.compact
+    end
+
+    def irc_color
+      StringIrc.new(self)
     end
   end
 end
