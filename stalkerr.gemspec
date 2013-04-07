@@ -1,27 +1,36 @@
-require File.expand_path('../lib/stalkerr/version', __FILE__)
+# coding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'stalkerr/version'
 
-Gem::Specification.new do |gem|
-  gem.authors       = ['linyows']
-  gem.email         = ['linyows@gmail.com']
-  gem.description   = %q{Stalkerr is IRC Server for stalking :)}
-  gem.summary       = %q{Stalkerr is IRC Gateway, inspired by agig and atig.}
-  gem.homepage      = 'https://github.com/linyows/stalkerr'
+Gem::Specification.new do |spec|
+  spec.name          = 'stalkerr'
+  spec.version       = Stalkerr::VERSION
+  spec.authors       = ['linyows']
+  spec.email         = ['linyows@gmail.com']
+  spec.description   = %q{Stalkerr is IRC Server for stalking :)}
+  spec.summary       = %q{Stalkerr is IRC Gateway, inspired by agig and atig.}
+  spec.homepage      = 'https://github.com/linyows/stalkerr'
+  spec.license       = 'MIT'
 
-  gem.required_ruby_version = Gem::Requirement.new(">= 1.9.3")
+  spec.required_ruby_version = Gem::Requirement.new('>= 1.9.3')
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  gem.files         = `git ls-files`.split("\n")
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  gem.name          = 'stalkerr'
-  gem.require_paths = ['lib']
-  gem.version       = Stalkerr::VERSION
+  spec.files         = `git ls-files`.split($/)
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.require_paths = ['lib']
 
-  gem.add_dependency 'net-irc', ['>= 0.0.9']
-  gem.add_dependency 'json', ['>= 1.7.7']
-  gem.add_dependency 'octokit', ['>= 0.0.9']
-  gem.add_dependency 'string-irc', ['>= 0.3.0']
-  gem.add_dependency 'qiita', ['>= 0.0.3']
+  spec.add_dependency 'net-irc', '~> 0.0.9'
+  spec.add_dependency 'json', '~> 1.7.7'
+  spec.add_dependency 'octokit', '~> 1.23.0'
+  spec.add_dependency 'string-irc', '~> 0.3.0'
+  spec.add_dependency 'qiita', '~> 0.0.3'
 
-  gem.add_development_dependency 'bundler'
-  gem.add_development_dependency 'rspec'
+  spec.add_development_dependency 'bundler', '~> 1.3'
+  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'webmock'
+  spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'awesome_print'
 end
