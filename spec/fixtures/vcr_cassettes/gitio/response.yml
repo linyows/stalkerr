@@ -1,0 +1,48 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://git.io/
+    body:
+      encoding: US-ASCII
+      string: url=https%3A%2F%2Fgithub.com%2Flinyows%2Fstalkerr
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+      Content-Type:
+      - application/x-www-form-urlencoded
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Server:
+      - GitHub.com
+      X-Node:
+      - gitio2
+      Content-Type:
+      - text/html;charset=utf-8
+      Date:
+      - Mon, 08 Apr 2013 16:17:28 GMT
+      Status:
+      - 201 Created
+      X-Revision:
+      - bf8bd90875382da4fa2b4842c02b54404c2f3220
+      Location:
+      - http://git.io/CSRjYA
+      X-Runtime:
+      - '0.007978'
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '35'
+    body:
+      encoding: UTF-8
+      string: https://github.com/linyows/stalkerr
+    http_version: 
+  recorded_at: Mon, 08 Apr 2013 16:17:28 GMT
+recorded_with: VCR 2.4.0

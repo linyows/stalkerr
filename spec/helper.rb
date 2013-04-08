@@ -10,9 +10,15 @@ end
 require 'stalkerr'
 require 'rspec'
 require 'webmock/rspec'
+require 'vcr'
 
-RSpec.configure do |config|
-  config.include WebMock::API
+RSpec.configure do |c|
+  c.include WebMock::API
+end
+
+VCR.configure do |c|
+  c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
+  c.hook_into :webmock
 end
 
 def fixture_path
