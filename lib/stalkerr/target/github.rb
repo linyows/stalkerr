@@ -31,11 +31,11 @@ module Stalkerr::Target
           time = Time.now.utc - Stalkerr::Const::ROLLBACK_SEC
           next if time >= Time.parse(event.created_at).utc
         else
-          next if @last_event_id >= event.id
+          next if @last_event_id.to_i >= event.id.to_i
         end
         next unless result = parse(event)
         posts(result)
-        @last_event_id = result.event_id
+        @last_event_id = result[:event_id]
       }
     end
 
