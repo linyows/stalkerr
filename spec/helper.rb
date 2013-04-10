@@ -13,6 +13,7 @@ require 'stalkerr'
 require 'rspec'
 require 'webmock/rspec'
 require 'vcr'
+require 'awesome_print'
 
 WebMock.disable_net_connect!(allow: 'coveralls.io')
 
