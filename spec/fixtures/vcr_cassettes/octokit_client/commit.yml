@@ -1,0 +1,112 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://jack:nicholson@api.github.com/repos/pagespeed/ngx_pagespeed/commits/10cbf7148f47134e9c155ed800dcd36d43993365
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Octokit Ruby Gem 1.23.0
+      Accept:
+      - application/vnd.github.beta+json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - GitHub.com
+      Date:
+      - Wed, 10 Apr 2013 15:41:32 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Status:
+      - 200 OK
+      X-Ratelimit-Limit:
+      - '5000'
+      X-Ratelimit-Remaining:
+      - '4994'
+      Vary:
+      - Accept, Authorization, Cookie
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Last-Modified:
+      - Wed, 10 Apr 2013 15:31:12 GMT
+      Etag:
+      - '"0808abd8e57ce6b392a35dbea06f6d7f"'
+      X-Github-Media-Type:
+      - github.beta; format=json
+      X-Content-Type-Options:
+      - nosniff
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Expose-Headers:
+      - Link, X-RateLimit-Limit, X-RateLimit-Remaining, X-OAuth-Scopes, X-Accepted-OAuth-Scopes
+      Access-Control-Allow-Origin:
+      - '*'
+    body:
+      encoding: UTF-8
+      string: '{"sha":"10cbf7148f47134e9c155ed800dcd36d43993365","commit":{"author":{"name":"Jeff
+        Kaufman","email":"jefftk@google.com","date":"2013-04-10T15:31:12Z"},"committer":{"name":"Jeff
+        Kaufman","email":"jefftk@google.com","date":"2013-04-10T15:31:12Z"},"message":"with
+        port changes we don''t need the port in the MapProxyDomain","tree":{"sha":"52f38fad42dcfe53becef0403af02869c09a461f","url":"https://api.github.com/repos/pagespeed/ngx_pagespeed/git/trees/52f38fad42dcfe53becef0403af02869c09a461f"},"url":"https://api.github.com/repos/pagespeed/ngx_pagespeed/git/commits/10cbf7148f47134e9c155ed800dcd36d43993365","comment_count":0},"url":"https://api.github.com/repos/pagespeed/ngx_pagespeed/commits/10cbf7148f47134e9c155ed800dcd36d43993365","html_url":"https://github.com/pagespeed/ngx_pagespeed/commit/10cbf7148f47134e9c155ed800dcd36d43993365","comments_url":"https://api.github.com/repos/pagespeed/ngx_pagespeed/commits/10cbf7148f47134e9c155ed800dcd36d43993365/comments","author":{"login":"jeffkaufman","id":262566,"avatar_url":"https://secure.gravatar.com/avatar/1c43cb01fde39470cde8a1d7fd600a4f?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png","gravatar_id":"1c43cb01fde39470cde8a1d7fd600a4f","url":"https://api.github.com/users/jeffkaufman","html_url":"https://github.com/jeffkaufman","followers_url":"https://api.github.com/users/jeffkaufman/followers","following_url":"https://api.github.com/users/jeffkaufman/following","gists_url":"https://api.github.com/users/jeffkaufman/gists{/gist_id}","starred_url":"https://api.github.com/users/jeffkaufman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jeffkaufman/subscriptions","organizations_url":"https://api.github.com/users/jeffkaufman/orgs","repos_url":"https://api.github.com/users/jeffkaufman/repos","events_url":"https://api.github.com/users/jeffkaufman/events{/privacy}","received_events_url":"https://api.github.com/users/jeffkaufman/received_events","type":"User"},"committer":{"login":"jeffkaufman","id":262566,"avatar_url":"https://secure.gravatar.com/avatar/1c43cb01fde39470cde8a1d7fd600a4f?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png","gravatar_id":"1c43cb01fde39470cde8a1d7fd600a4f","url":"https://api.github.com/users/jeffkaufman","html_url":"https://github.com/jeffkaufman","followers_url":"https://api.github.com/users/jeffkaufman/followers","following_url":"https://api.github.com/users/jeffkaufman/following","gists_url":"https://api.github.com/users/jeffkaufman/gists{/gist_id}","starred_url":"https://api.github.com/users/jeffkaufman/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/jeffkaufman/subscriptions","organizations_url":"https://api.github.com/users/jeffkaufman/orgs","repos_url":"https://api.github.com/users/jeffkaufman/repos","events_url":"https://api.github.com/users/jeffkaufman/events{/privacy}","received_events_url":"https://api.github.com/users/jeffkaufman/received_events","type":"User"},"parents":[{"sha":"3151f0adfc490d4a42d6778a15109a1c79daa8c3","url":"https://api.github.com/repos/pagespeed/ngx_pagespeed/commits/3151f0adfc490d4a42d6778a15109a1c79daa8c3","html_url":"https://github.com/pagespeed/ngx_pagespeed/commit/3151f0adfc490d4a42d6778a15109a1c79daa8c3"}],"stats":{"total":2,"additions":1,"deletions":1},"files":[{"sha":"ed1f2c761b6d801223ca8d6554385a4fbcca2d02","filename":"test/pagespeed_test.conf.template","status":"modified","additions":1,"deletions":1,"changes":2,"blob_url":"https://github.com/pagespeed/ngx_pagespeed/blob/10cbf7148f47134e9c155ed800dcd36d43993365/test/pagespeed_test.conf.template","raw_url":"https://github.com/pagespeed/ngx_pagespeed/raw/10cbf7148f47134e9c155ed800dcd36d43993365/test/pagespeed_test.conf.template","contents_url":"https://api.github.com/repos/pagespeed/ngx_pagespeed/contents/test/pagespeed_test.conf.template?ref=10cbf7148f47134e9c155ed800dcd36d43993365","patch":"@@
+        -26,7 +26,7 @@ http {\n     server_name mpd.example.com;\n     pagespeed FileCachePath
+        \"@@SECONDARY_CACHE@@\";\n \n-    pagespeed MapProxyDomain mpd.example.com:@@SECONDARY_PORT@@/pss_images\n+    pagespeed
+        MapProxyDomain mpd.example.com/pss_images\n                              http://ref.pssdemos.com/filter/images;\n   }\n
+        "}]}'
+    http_version: 
+  recorded_at: Wed, 10 Apr 2013 15:41:32 GMT
+- request:
+    method: post
+    uri: http://git.io/
+    body:
+      encoding: US-ASCII
+      string: url=https%3A%2F%2Fgithub.com%2Fpagespeed%2Fngx_pagespeed%2Fcommit%2F10cbf7148f47134e9c155ed800dcd36d43993365
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+      Content-Type:
+      - application/x-www-form-urlencoded
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Server:
+      - GitHub.com
+      X-Node:
+      - gitio2
+      Content-Type:
+      - text/html;charset=utf-8
+      Date:
+      - Wed, 10 Apr 2013 15:41:33 GMT
+      Status:
+      - 201 Created
+      X-Revision:
+      - bf8bd90875382da4fa2b4842c02b54404c2f3220
+      Location:
+      - http://git.io/WdUfEA
+      X-Runtime:
+      - '0.006952'
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '90'
+    body:
+      encoding: UTF-8
+      string: https://github.com/pagespeed/ngx_pagespeed/commit/10cbf7148f47134e9c155ed800dcd36d43993365
+    http_version: 
+  recorded_at: Wed, 10 Apr 2013 15:41:33 GMT
+recorded_with: VCR 2.4.0

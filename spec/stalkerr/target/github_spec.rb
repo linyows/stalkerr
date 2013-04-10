@@ -3,6 +3,7 @@ require 'helper'
 describe Stalkerr::Target::Github do
   let(:username) { 'jack' }
   let(:password) { 'nicholson' }
+  let(:path) { 'octokit_client/received_events' }
   before { @github = described_class.new(username, password) }
 
   describe '#initialize' do
@@ -47,7 +48,7 @@ describe Stalkerr::Target::Github do
     end
 
     it 'return is array' do
-      VCR.use_cassette 'octokit_client/received_events', :match_requests_on => [:path] do
+      VCR.use_cassette 'octokit_client/received_events', match_requests_on: [:path] do
         expect(subject).to be_an_instance_of(Array)
       end
     end
@@ -55,7 +56,7 @@ describe Stalkerr::Target::Github do
 
   describe '#parse' do
     before do
-      @event = VCR.use_cassette 'octokit_client/received_events', :match_requests_on => [:path] do
+      @event = VCR.use_cassette path, match_requests_on: [:path] do
         @github.client.received_events(username).sort_by(&:id).map { |e|
           e if e.type == event_type
         }.compact.last
@@ -66,7 +67,46 @@ describe Stalkerr::Target::Github do
 
     context 'issues event' do
       let(:event_type) { 'IssuesEvent' }
-      it { expect(subject[:nick]).to eq('senny') }
+
+      it 'matched status format' do
+        regex = /(created|closed) issue #[0-9]+/
+        expect(subject[:status].to_s).to match regex
+      end
+    end
+
+    context 'issue comment event' do
+      let(:event_type) { 'IssueCommentEvent' }
+
+      it 'matched status format' do
+        regex = /(commented on issue #[0-9]+|deleted issue comment)/
+        expect(subject[:status].to_s).to match regex
+      end
+    end
+
+    context 'pull request event' do
+      let(:event_type) { 'PullRequestEvent' }
+
+      it 'matched status format' do
+        regex = /(created|closed) pull request #[0-9]+/
+        expect(subject[:status].to_s).to match regex
+      end
+    end
+
+    context 'push event' do
+      let(:event_type) { 'PushEvent' }
+
+      it 'matched status format' do
+        VCR.use_cassette 'octokit_client/commit', match_requests_on: [:path] do
+          regex = /pushed to /
+          expect(subject[:status].to_s).to match regex
+        end
+      end
+
+      it 'noticeable' do
+        VCR.use_cassette 'octokit_client/commit', match_requests_on: [:path] do
+          expect(subject[:notice]).to be_true
+        end
+      end
     end
   end
 
