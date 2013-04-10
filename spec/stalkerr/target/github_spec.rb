@@ -54,6 +54,20 @@ describe Stalkerr::Target::Github do
   end
 
   describe '#parse' do
+    before do
+      @event = VCR.use_cassette 'octokit_client/received_events', :match_requests_on => [:path] do
+        @github.client.received_events(username).sort_by(&:id).map { |e|
+          e if e.type == event_type
+        }.compact.last
+      end
+    end
+
+    subject { @github.parse(@event) }
+
+    context 'issues event' do
+      let(:event_type) { 'IssuesEvent' }
+      it { expect(subject[:nick]).to eq('senny') }
+    end
   end
 
   describe '#shorten' do
