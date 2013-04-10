@@ -21,7 +21,7 @@ describe Stalkerr::Extensions::String do
     it { expect(empty.split_by_crlf).to eq([]) }
   end
 
-  describe '#irc_color' do
-    it { expect('String'.irc_color.class).to eq(StringIrc) }
+  describe '#to_irc_color' do
+    it { expect('String'.to_irc_color.class).to eq(StringIrc) }
   end
 end

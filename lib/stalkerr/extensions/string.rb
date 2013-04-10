@@ -17,7 +17,7 @@ module Stalkerr::Extensions
       self.split(/\r\n|\n/).map { |v| v unless v.eql? '' }.compact
     end
 
-    def irc_color
+    def to_irc_color
       StringIrc.new(self)
     end
   end
