@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'net-irc', '~> 0.0.9'
   spec.add_dependency 'json', '~> 1.7.7'
-  spec.add_dependency 'octokit', '~> 1.23.0'
+  spec.add_dependency 'octokit', '~> 3.4.0'
   spec.add_dependency 'string-irc', '~> 0.3.0'
   spec.add_dependency 'qiita', '~> 0.0.3'
 
