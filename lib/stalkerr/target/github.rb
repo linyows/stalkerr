@@ -17,7 +17,7 @@ module Stalkerr::Target
     end
 
     def client
-      if !@client || @client && !@client.authenticated?
+      if !@client || @client && !@client.token_authenticated?
         @client = Octokit::Client.new(access_token: @password)
       end
       @client
