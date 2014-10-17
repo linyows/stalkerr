@@ -196,25 +196,23 @@ module Stalkerr::Target
       }
     end
 
-    def posts(params)
-      params.each { |k, v| eval "#{k} = v" }
-
+    def posts(p)
       header = ''
-      header = "(#{repository}) #{status}" unless repository.eql? ''
-      header = "#{header} #{title}" unless title.eql? ''
-      header = "#{header} - #{shorten(link).to_irc_color.blue}" unless link.eql? ''
+      header = "(#{p[:repository]}) #{p[:status]}" unless p[:repository].eql? ''
+      header = "#{header} #{p[:title]}" unless p[:title].eql? ''
+      header = "#{header} - #{shorten(p[:link]).to_irc_color.blue}" unless p[:link].eql? ''
 
       unless header.empty?
-        @post.call nick, NOTICE, CHANNEL, header
+        @post.call p[:nick], NOTICE, CHANNEL, header
       end
 
-      if !body.nil? && !body.empty?
+      if !p[:body].nil? && !p[:body].empty?
         body.each do |line|
-          mode = notice ? NOTICE : PRIVMSG
+          mode = p[:notice] ? NOTICE : PRIVMSG
           # maximum line length 512
           # http://www.mirc.com/rfc2812.html
           line.each_char.each_slice(512) do |string|
-            @post.call nick, mode, CHANNEL, string.join
+            @post.call p[:nick], mode, CHANNEL, string.join
             sleep 1
           end
         end
