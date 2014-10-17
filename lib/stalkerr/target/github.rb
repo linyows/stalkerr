@@ -206,7 +206,7 @@ module Stalkerr::Target
       end
 
       if !p[:body].nil? && !p[:body].empty?
-        body.each do |line|
+        p[:body].each do |line|
           mode = p[:notice] ? NOTICE : PRIVMSG
           # maximum line length 512
           # http://www.mirc.com/rfc2812.html
