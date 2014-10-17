@@ -19,7 +19,7 @@ module Stalkerr::Target
 
     def client
       if !@client || @client && !@client.authenticated?
-        @client = Octokit.new(login: @username, password: @password)
+        @client = Octokit.new(login: @username, access_token: @password)
       end
       @client
     end
@@ -175,6 +175,15 @@ module Stalkerr::Target
         status = status.to_irc_color.send(color)
       end
 
+      unless body.eql? ''
+        if body.length > 20
+          body_footer = body[-3..-1]
+          body = body[0...15]
+          body << '-----8<----- c u t -----8<-----'
+          body = body + body_footer
+        end
+      end
+
       {
         event_id: event.id,
         nick: event.actor.login,
@@ -200,7 +209,15 @@ module Stalkerr::Target
       end
 
       if !body.nil? && !body.empty?
-        body.each { |b| @post.call nick, notice ? NOTICE : PRIVMSG, CHANNEL, b }
+        body.each do |line|
+          mode = notice ? NOTICE : PRIVMSG
+          # maximum line length 512
+          # http://www.mirc.com/rfc2812.html
+          line.each_char.each_slice(512) do |string|
+            @post.call nick, mode, CHANNEL, string.join
+            sleep 1
+          end
+        end
       end
     end
 

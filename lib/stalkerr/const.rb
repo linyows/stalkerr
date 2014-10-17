@@ -6,5 +6,5 @@ module Stalkerr::Const
 
   ROLLBACK_SEC = 60 * 60
 
-  FETCH_INTERVAL = 30
+  FETCH_INTERVAL = 60 * 3
 end

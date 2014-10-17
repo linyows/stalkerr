@@ -97,7 +97,27 @@ module Stalkerr::Target
 
       @post.call simple(nick), NOTICE, CHANNEL, header
       mode = notice_body ? NOTICE : PRIVMSG
-      body.each { |b| @post.call simple(nick), mode, CHANNEL, b } unless body.eql? []
+
+      unless body.eql? ''
+        if body.length > 20
+          body_footer = body[-3..-1]
+          body = body[0...15]
+          body << '-----8<----- c u t -----8<-----'
+          body = body + body_footer
+        end
+
+        body.each { |b|
+          if b.length > 150
+            b.scan(/.{1,150}/).each { |bb|
+              @post.call simple(nick), mode, CHANNEL, bb
+            }
+            sleep 1
+          else
+            @post.call simple(nick), mode, CHANNEL, b
+          end
+          sleep 1
+        }
+      end
     end
 
     def split_for_body(string)
