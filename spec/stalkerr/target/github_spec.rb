@@ -26,10 +26,10 @@ describe Stalkerr::Target::Github do
 
     context 'when not authenticated' do
       before do
-        Octokit::Client.any_instance.stub(:authenticated?).and_return(false)
+        Octokit::Client.any_instance.stub(:token_authenticated?).and_return(false)
         @id = @github.client.object_id
       end
-      it { expect(subject.object_id.eql? @id).to be_false }
+      it { expect(subject.object_id.eql? @id).to be_falsy }
     end
   end
 
@@ -104,7 +104,7 @@ describe Stalkerr::Target::Github do
 
       it 'noticeable' do
         VCR.use_cassette 'octokit_client/commit', match_requests_on: [:path] do
-          expect(subject[:notice]).to be_true
+          expect(subject[:notice]).to be_truthy
         end
       end
     end
