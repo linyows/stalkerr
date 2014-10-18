@@ -10,7 +10,9 @@ module Stalkerr::Target
   class Github
     include Net::IRC::Constants
 
-    CHANNEL = '#github'
+    def channel
+      ENV['GITHUB_CHANNEL'] || '#github'
+    end
 
     def initialize(username, password)
       raise GithubError, 'username is nil' if username.nil?
@@ -207,7 +209,7 @@ module Stalkerr::Target
       header = "#{header} - #{shorten(p[:link]).to_irc_color.blue}" unless p[:link].eql? ''
 
       unless header.empty?
-        @post.call p[:nick], NOTICE, CHANNEL, header
+        @post.call p[:nick], NOTICE, channel, header
       end
 
       if !p[:body].nil? && !p[:body].empty?
@@ -216,7 +218,7 @@ module Stalkerr::Target
           # maximum line length 512
           # http://www.mirc.com/rfc2812.html
           line.each_char.each_slice(512) do |string|
-            @post.call p[:nick], mode, CHANNEL, string.join
+            @post.call p[:nick], mode, channel, string.join
             sleep 1
           end
         end
