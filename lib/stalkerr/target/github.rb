@@ -5,12 +5,17 @@ require 'net/http'
 require 'stalkerr'
 
 module Stalkerr::Target
+  class GithubError < StandardError; end
+
   class Github
     include Net::IRC::Constants
 
     CHANNEL = '#github'
 
     def initialize(username, password)
+      raise GithubError, 'username is nil' if username.nil?
+      raise GithubError, 'password is nil' if password.nil?
+
       @username = username
       @password = password
       @last_event_id = nil
