@@ -13,6 +13,10 @@ module Stalkerr::Extensions
       constant
     end
 
+    def camerize
+      self.to_s.gsub(/\/(.?)/) { "::#{$1.upcase}" }.gsub(/(?:^|_)(.)/) { $1.upcase }
+    end
+
     def split_by_crlf
       self.split(/\r\n|\n/).map { |v| v unless v.eql? '' }.compact
     end

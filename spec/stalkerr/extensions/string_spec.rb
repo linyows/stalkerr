@@ -6,6 +6,12 @@ describe Stalkerr::Extensions::String do
     it { expect('String'.constantize).to eq(String) }
   end
 
+  describe '.camerize' do
+    it 'returns camelcase' do
+      expect('foo_bar_baz'.camerize).to eq 'FooBarBaz'
+    end
+  end
+
   describe '#split_by_crlf' do
     let(:sentence) {
       <<-RUBY
