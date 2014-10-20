@@ -5,21 +5,27 @@ require 'net/http'
 require 'stalkerr'
 
 module Stalkerr::Target
+  class GithubError < StandardError; end
+
   class Github
     include Net::IRC::Constants
 
-    HOST = 'https://github.com'
-    CHANNEL = '#github'
+    def channel
+      ENV['GITHUB_CHANNEL'] || '#github'
+    end
 
     def initialize(username, password)
+      raise GithubError, 'username is nil' if username.nil?
+      raise GithubError, 'password is nil' if password.nil?
+
       @username = username
       @password = password
       @last_event_id = nil
     end
 
     def client
-      if !@client || @client && !@client.authenticated?
-        @client = Octokit.new(login: @username, password: @password)
+      if !@client || @client && !@client.token_authenticated?
+        @client = Octokit::Client.new(access_token: @password)
       end
       @client
     end
@@ -28,8 +34,8 @@ module Stalkerr::Target
       @post = post
       client.received_events(@username).sort_by(&:id).reverse_each { |event|
         if @last_event_id.nil?
-          time = Time.now.utc - Stalkerr::Const::ROLLBACK_SEC
-          next if time >= Time.parse(event.created_at).utc
+          time = Time.now - Stalkerr::Const::ROLLBACK_SEC
+          next if time >= event.created_at.localtime
         else
           next if @last_event_id.to_i >= event.id.to_i
         end
@@ -91,12 +97,12 @@ module Stalkerr::Target
         obj.commits.each do |commit|
           verbose_commit = client.commit(event.repo.name, commit.sha)
           name = verbose_commit.author ? verbose_commit.author.login : commit.author.name
-          url = "#{HOST}/#{event.repo.name}/commit/#{commit.sha}"
+          url = "#{client.web_endpoint}#{event.repo.name}/commit/#{commit.sha}"
           line = "#{name.to_irc_color.silver}: #{commit.message}"
           line << " - #{shorten(url).to_irc_color.blue}"
           body = line.split_by_crlf
         end
-        link = "#{HOST}/#{event.repo.name}"
+        link = "#{client.web_endpoint}#{event.repo.name}"
       when 'CreateEvent'
         if obj.ref_type.eql? 'repository'
           repository = nil
@@ -107,10 +113,10 @@ module Stalkerr::Target
           status = "created #{obj.ref_type}:#{obj.ref}"
           title = obj.description
         end
-        link = "#{HOST}/#{event.repo.name}"
+        link = "#{client.web_endpoint}#{event.repo.name}"
       when 'DeleteEvent'
         status = "deleted #{obj.ref_type}:#{obj.ref}"
-        link = "#{HOST}/#{event.repo.name}"
+        link = "#{client.web_endpoint}#{event.repo.name}"
       when 'DownloadEvent'
         status = "download #{obj.name}"
         title = obj.description
@@ -126,7 +132,7 @@ module Stalkerr::Target
         repository = nil
         status = "#{obj.action} repository"
         title = event.repo.name
-        link = "#{HOST}/#{event.repo.name}"
+        link = "#{client.web_endpoint}#{event.repo.name}"
       when 'FollowEvent'
         repository = nil
         notice = true
@@ -142,12 +148,12 @@ module Stalkerr::Target
         profile << "#{'bio'.to_irc_color.silver}: #{user.bio && user.bio != '' ? user.bio : '-'}"
         profile << "#{'blog'.to_irc_color.silver}: #{user.blog && user.blog != '' ? user.blog : '-'}"
         body << profile.join(', ')
-        link = "#{HOST}/#{user.login}"
+        link = "#{client.web_endpoint}#{user.login}"
       when 'MemberEvent'
         user = obj.member
         status = "#{obj.action} member"
         title = user.login
-        link = "#{HOST}/#{user.login}"
+        link = "#{client.web_endpoint}#{user.login}"
       when 'GistEvent'
         repository = nil
         status = "#{obj.action}d gist"
@@ -175,6 +181,15 @@ module Stalkerr::Target
         status = status.to_irc_color.send(color)
       end
 
+      unless body.eql? ''
+        if body.length > 20
+          body_footer = body[-3..-1]
+          body = body[0...15]
+          body << '-----8<----- c u t -----8<-----'
+          body = body + body_footer
+        end
+      end
+
       {
         event_id: event.id,
         nick: event.actor.login,
@@ -187,20 +202,26 @@ module Stalkerr::Target
       }
     end
 
-    def posts(params)
-      params.each { |k, v| eval "#{k} = v" }
-
+    def posts(p)
       header = ''
-      header = "(#{repository}) #{status}" unless repository.eql? ''
-      header = "#{header} #{title}" unless title.eql? ''
-      header = "#{header} - #{shorten(link).to_irc_color.blue}" unless link.eql? ''
+      header = "(#{p[:repository]}) #{p[:status]}" unless p[:repository].eql? ''
+      header = "#{header} #{p[:title]}" unless p[:title].eql? ''
+      header = "#{header} - #{shorten(p[:link]).to_irc_color.blue}" unless p[:link].eql? ''
 
       unless header.empty?
-        @post.call nick, NOTICE, CHANNEL, header
+        @post.call p[:nick], NOTICE, channel, header
       end
 
-      if !body.nil? && !body.empty?
-        body.each { |b| @post.call nick, notice ? NOTICE : PRIVMSG, CHANNEL, b }
+      if !p[:body].nil? && !p[:body].empty?
+        p[:body].each do |line|
+          mode = p[:notice] ? NOTICE : PRIVMSG
+          # maximum line length 512
+          # http://www.mirc.com/rfc2812.html
+          line.each_char.each_slice(512) do |string|
+            @post.call p[:nick], mode, channel, string.join
+            sleep 1
+          end
+        end
       end
     end
 
