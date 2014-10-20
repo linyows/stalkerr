@@ -1,11 +1,11 @@
 Stalkerr
 ========
 
-[![Gem Version](https://badge.fury.io/rb/stalkerr.png)][gem]
-[![Build Status](https://secure.travis-ci.org/linyows/stalkerr.png?branch=master)][travis]
-[![Dependency Status](https://gemnasium.com/linyows/stalkerr.png?travis)][gemnasium]
-[![Code Climate](https://codeclimate.com/github/linyows/stalkerr.png)][codeclimate]
-[![Coverage Status](https://coveralls.io/repos/linyows/stalkerr/badge.png?branch=master)][coveralls]
+[![Gem Version](http://img.shields.io/gem/v/stalkerr.svg)][gem]
+[![Build Status](http://img.shields.io/travis/linyows/stalkerr.svg)][travis]
+[![Dependency Status](http://img.shields.io/gemnasium/linyows/stalkerr.svg)][gemnasium]
+[![Code Climate](http://img.shields.io/codeclimate/github/linyows/stalkerr.svg)][codeclimate]
+[![Coverage Status](http://img.shields.io/coveralls/linyows/stalkerr.svg)][coveralls]
 
 [gem]: https://rubygems.org/gems/stalkerr
 [travis]: http://travis-ci.org/linyows/stalkerr
