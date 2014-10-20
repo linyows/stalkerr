@@ -17,19 +17,51 @@ Stalkerr is IRC Gateway, inspired by [agig](https://github.com/hsbt/agig) and [a
 
 ![The Shining](http://goo.gl/7JPKQ)
 
+Installation
+------------
+
+And then execute:
+
+```sh
+$ bundle
+```
+
+Or install it yourself as:
+
+```sh
+$ gem install octospy
+```
+
 Usage
 -----
 
-### Start Stalkerr
+Start Stalkerr
 
-    $ gem install stalkerr
-    $ stalkerr --help
-    $ stalkerr -D
+```sh
+$ stalkerr -D
+```
 
-### Connecting to Stalkerr
+Join channel with username and access_token
 
-    /join #github <username>:<password>
-    /join #qiita <username>:<password>
+```irc
+/join #github <username>:<access_token>
+```
+
+If use GitHub:Enterprise
+
+```sh
+$ env GITHUB_ENTERPRISE_API_ENDPOINT="http://your.enterprise.domain/api/v3/" \
+> env GITHUB_ENTERPRISE_WEB_ENDPOINT="http://your.enterprise.domain/" \
+> stalkerr -D
+```
+
+Support Service
+
+- GitHub
+- GitHub:Enterprise
+- Qiita
+- ~~twitter~~
+- ~~facebook~~
 
 Contributing
 ------------
@@ -48,4 +80,4 @@ Author
 License
 -------
 
-MIT
+The MIT License (MIT)
