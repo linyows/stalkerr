@@ -26,7 +26,7 @@ describe Stalkerr::Target::Github do
 
     context 'when not authenticated' do
       before do
-        Octokit::Client.any_instance.stub(:token_authenticated?).and_return(false)
+        allow_any_instance_of(Octokit::Client).to receive(:token_authenticated?).and_return(false)
         @id = @github.client.object_id
       end
       it { expect(subject.object_id.eql? @id).to be_falsy }
@@ -37,8 +37,8 @@ describe Stalkerr::Target::Github do
     let(:parse_result) { { event_id: 123456789 } }
 
     before do
-      @github.stub(:parse).and_return(parse_result)
-      @github.stub(:posts).and_return(nil)
+      allow(@github).to receive(:parse).and_return(parse_result)
+      allow(@github).to receive(:posts).and_return(nil)
     end
 
     subject do
